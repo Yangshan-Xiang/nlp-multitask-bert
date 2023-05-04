@@ -44,6 +44,14 @@ You can download pretrained models here:
 
 >📋  Give a link to where/how the pretrained models can be downloaded and how they were trained (if applicable).  Alternatively you can have an additional column in your results table with a link to the models.
 
+## Methodology
+
+required section as per project description section 9.3. 
+
+## Experiments
+
+required section as per project description section 9.3.
+
 ## Results
 
 Our model achieves the following performance on :
@@ -56,6 +64,53 @@ Our model achieves the following performance on :
 
 >📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. 
 
+## Individual Contributions 
+
+required section as per project description section 9.3. 
+
+### Part 1 
+
+#### Debwashis
+* Contribution 1
+* ...
+
+#### Yangshan
+* Contribution 1
+* ...
+
+#### De Xiong Michael
+* Contribution 1
+* ...
+
+#### Leander
+* Contribution 1
+* ...
+
+#### Jonas
+* Contribution 1
+* ...
+
+### Part 2 
+
+#### Debwashis
+* Contribution 1
+* ...
+
+#### Yangshan
+* Contribution 1
+* ...
+
+#### De Xiong Michael
+* Contribution 1
+* ...
+
+#### Leander
+* Contribution 1
+* ...
+
+#### Jonas
+* Contribution 1
+* ...
 
 ## Contributing
 
