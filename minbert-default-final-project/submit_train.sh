@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=train-nn-gpu
-#SBATCH -t 00:15:00                  # set time limit
-#SBATCH -p grete:shared         # -p grete:shared for training, -p grete:interactive for debugging 
+#SBATCH -t 00:05:00                  # set time limit
+#SBATCH -p grete:interactive         # -p grete:shared for training, -p grete:interactive for debugging 
 
 
-#SBATCH -G A100:1                    # take 1 GPU, see https://www.hlrn.de/doc/display/PUB/GPU+Usage for more options
-#SBATCH --mem-per-gpu=5G             # setting the right constraints for the splitted gpu partitions
+#SBATCH -G V100:1                    # take 1 GPU, see https://www.hlrn.de/doc/display/PUB/GPU+Usage for more options
+##SBATCH --mem-per-gpu=5G             # setting the right constraints for the splitted gpu partitions
 
 #SBATCH --nodes=1                    # total number of nodes
 #SBATCH --ntasks=1                   # total number of tasks
@@ -21,6 +21,8 @@ module load anaconda3
 module load cuda
 source activate dnlp
 
+
+
 # Printing out some info.
 echo "Submitting job with sbatch from directory: ${SLURM_SUBMIT_DIR}"
 echo "Home directory: ${HOME}"
@@ -28,5 +30,5 @@ echo "Working directory: $PWD"
 echo "Current node: ${SLURM_NODELIST}"
 
 # Run the script:
-python -u classifier.py
+python -u classifier.py --use_gpu
 

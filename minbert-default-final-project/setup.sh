@@ -3,7 +3,8 @@
 conda create -n dnlp python=3.8
 conda activate dnlp
 
-conda install pytorch==1.8.0 torchvision torchaudio cudatoolkit=10.1 -c pytorch
+#conda install pytorch==1.8.0 torchvision torchaudio cudatoolkit=10.1 -c pytorch
+conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 pip install tqdm==4.58.0
 pip install requests==2.25.1
 pip install importlib-metadata==3.7.0
