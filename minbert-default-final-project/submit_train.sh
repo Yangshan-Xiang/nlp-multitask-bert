@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=train-nn-gpu
-#SBATCH -t 00:05:00                  # set time limit
+#SBATCH -t 00:30:00                  # set time limit
 #SBATCH -p grete:interactive         # -p grete:shared for training, -p grete:interactive for debugging 
 
 
@@ -29,6 +29,7 @@ echo "Home directory: ${HOME}"
 echo "Working directory: $PWD"
 echo "Current node: ${SLURM_NODELIST}"
 
-# Run the script:
-python -u classifier.py --use_gpu
+# Run the script(s):
+python -u classifier.py --option pretrain --use_gpu --lr 1e-3 --batch_size 64 --hidden_dropout 0.3
+python -u classifier.py --option finetune --use_gpu --lr 1e-5 --batch_size 64 --hidden_dropout 0.3
 

@@ -1,0 +1,63 @@
+================================================================================
+JobID = 4677421
+User = bzkurs47, Account = bzkurs47
+Partition = grete:interactive, Nodelist = ggpu02
+================================================================================
+Submitting job with sbatch from directory: /home/bzkurs47/do-nlp-with-linguistic-mavericks/minbert-default-final-project
+Home directory: /home/bzkurs47
+Working directory: /home/bzkurs47/do-nlp-with-linguistic-mavericks/minbert-default-final-project
+Current node: ggpu02
+Training Sentiment Classifier on SST...
+load 8544 data from data/ids-sst-train.csv
+load 1101 data from data/ids-sst-dev.csv
+save the model to sst-classifier.pt
+Epoch 0: train loss :: 1.574, train acc :: 0.284, dev acc :: 0.291
+save the model to sst-classifier.pt
+Epoch 1: train loss :: 1.534, train acc :: 0.312, dev acc :: 0.292
+save the model to sst-classifier.pt
+Epoch 2: train loss :: 1.512, train acc :: 0.375, dev acc :: 0.367
+save the model to sst-classifier.pt
+Epoch 3: train loss :: 1.492, train acc :: 0.397, dev acc :: 0.385
+Epoch 4: train loss :: 1.469, train acc :: 0.393, dev acc :: 0.378
+Epoch 5: train loss :: 1.466, train acc :: 0.340, dev acc :: 0.356
+Epoch 6: train loss :: 1.465, train acc :: 0.342, dev acc :: 0.348
+save the model to sst-classifier.pt
+Epoch 7: train loss :: 1.451, train acc :: 0.411, dev acc :: 0.392
+save the model to sst-classifier.pt
+Epoch 8: train loss :: 1.448, train acc :: 0.405, dev acc :: 0.396
+Epoch 9: train loss :: 1.439, train acc :: 0.382, dev acc :: 0.359
+Evaluating on SST...
+load model from sst-classifier.pt
+load 1101 data from data/ids-sst-dev.csv
+DONE DEV
+DONE Test
+dev acc :: 0.396
+Training Sentiment Classifier on SST...
+load 8544 data from data/ids-sst-train.csv
+load 1101 data from data/ids-sst-dev.csv
+save the model to sst-classifier.pt
+Epoch 0: train loss :: 1.446, train acc :: 0.502, dev acc :: 0.460
+save the model to sst-classifier.pt
+Epoch 1: train loss :: 1.128, train acc :: 0.574, dev acc :: 0.478
+save the model to sst-classifier.pt
+Epoch 2: train loss :: 0.984, train acc :: 0.644, dev acc :: 0.511
+Epoch 3: train loss :: 0.877, train acc :: 0.688, dev acc :: 0.488
+Epoch 4: train loss :: 0.751, train acc :: 0.780, dev acc :: 0.499
+Epoch 5: train loss :: 0.640, train acc :: 0.852, dev acc :: 0.511
+Epoch 6: train loss :: 0.539, train acc :: 0.882, dev acc :: 0.479
+Epoch 7: train loss :: 0.444, train acc :: 0.902, dev acc :: 0.492
+Epoch 8: train loss :: 0.361, train acc :: 0.915, dev acc :: 0.486
+Epoch 9: train loss :: 0.294, train acc :: 0.972, dev acc :: 0.506
+Evaluating on SST...
+load model from sst-classifier.pt
+load 1101 data from data/ids-sst-dev.csv
+DONE DEV
+DONE Test
+dev acc :: 0.511
+============ Job Information ===================================================
+Submitted: 2023-06-05T21:10:26
+Started: 2023-06-05T21:10:41
+Ended: 2023-06-05T21:36:03
+Elapsed: 26 min, Limit: 30 min, Difference: 4 min
+CPUs: 4, Nodes: 1
+Estimated NPL: ================================================================================
