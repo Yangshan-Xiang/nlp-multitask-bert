@@ -46,7 +46,7 @@ class BertSelfAttention(nn.Module):
     attention_scores += attention_mask
     # normalize the scores
     attention_scores = nn.functional.softmax(attention_scores, dim=-1)
-    #attention_scores = self.dropout(attention_scores)
+    attention_scores = self.dropout(attention_scores)
     # multiply the attention scores to the value and get back V'
     output = torch.matmul(attention_scores, value) # shape of [bs, num_attention_heads, seq_len, attention_head_size]
     # next, we need to concat multi-heads and recover the original shape [bs, seq_len, num_attention_heads * attention_head_size = hidden_size]
@@ -97,7 +97,7 @@ class BertLayer(nn.Module):
     dropout: the dropout to be applied 
     ln_layer: the layer norm to be applied
     """
-    # Hint: Remember that BERT applies to the output of each sub-layer, before it is added to the sub-layer input and normalized 
+    # Hint: Remember that BERT applies dropout to the output of each sub-layer, before it is added to the sub-layer input and normalized
     hidden = dense_layer(output)
     hidden = dropout(hidden)
     hidden = ln_layer(hidden + input)
