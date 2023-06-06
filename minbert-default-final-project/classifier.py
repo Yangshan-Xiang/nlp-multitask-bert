@@ -36,6 +36,8 @@ class BertSentimentClassifier(torch.nn.Module):
         super(BertSentimentClassifier, self).__init__()
         self.num_labels = config.num_labels
         self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.classification = torch.nn.Linear(config.hidden_size, config.num_labels)
+        self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
 
         # Pretrain mode does not require updating bert paramters.
         for param in self.bert.parameters():
@@ -45,7 +47,7 @@ class BertSentimentClassifier(torch.nn.Module):
                 param.requires_grad = True
 
         ### TODO
-        raise NotImplementedError
+        #raise NotImplementedError
 
 
     def forward(self, input_ids, attention_mask):
@@ -54,7 +56,10 @@ class BertSentimentClassifier(torch.nn.Module):
         # HINT: you should consider what is the appropriate output to return given that
         # the training loop currently uses F.cross_entropy as the loss function.
         ### TODO
-        raise NotImplementedError
+        bert_out = self.bert(input_ids, attention_mask)
+        hidden_dropout = self.dropout(bert_out['pooler_output'])
+        return self.classification(hidden_dropout)
+        # raise NotImplementedError
 
 
 
@@ -371,6 +376,7 @@ if __name__ == "__main__":
     print('Evaluating on SST...')
     test(config)
 
+    '''
     print('Training Sentiment Classifier on cfimdb...')
     config = SimpleNamespace(
         filepath='cfimdb-classifier.pt',
@@ -391,3 +397,4 @@ if __name__ == "__main__":
 
     print('Evaluating on cfimdb...')
     test(config)
+    '''
