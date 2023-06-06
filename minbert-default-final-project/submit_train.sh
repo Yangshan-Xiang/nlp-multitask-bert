@@ -3,7 +3,6 @@
 #SBATCH -t 00:30:00                  # set time limit
 #SBATCH -p grete:interactive         # -p grete:shared for training, -p grete:interactive for debugging 
 
-
 #SBATCH -G V100:1                    # take 1 GPU, see https://www.hlrn.de/doc/display/PUB/GPU+Usage for more options
 ##SBATCH --mem-per-gpu=5G             # setting the right constraints for the splitted gpu partitions
 
@@ -20,8 +19,6 @@
 module load anaconda3
 module load cuda
 source activate dnlp
-
-
 
 # Printing out some info.
 echo "Submitting job with sbatch from directory: ${SLURM_SUBMIT_DIR}"

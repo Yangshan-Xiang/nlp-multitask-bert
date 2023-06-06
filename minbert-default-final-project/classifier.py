@@ -46,20 +46,15 @@ class BertSentimentClassifier(torch.nn.Module):
             elif config.option == 'finetune':
                 param.requires_grad = True
 
-        ### TODO
-        #raise NotImplementedError
-
-
     def forward(self, input_ids, attention_mask):
         '''Takes a batch of sentences and returns logits for sentiment classes'''
         # The final BERT contextualized embedding is the hidden state of [CLS] token (the first token).
         # HINT: you should consider what is the appropriate output to return given that
         # the training loop currently uses F.cross_entropy as the loss function.
-        ### TODO
+
         bert_out = self.bert(input_ids, attention_mask)
         hidden_dropout = self.dropout(bert_out['pooler_output'])
         return self.classification(hidden_dropout)
-        # raise NotImplementedError
 
 
 
@@ -375,26 +370,3 @@ if __name__ == "__main__":
 
     print('Evaluating on SST...')
     test(config)
-
-    '''
-    print('Training Sentiment Classifier on cfimdb...')
-    config = SimpleNamespace(
-        filepath='cfimdb-classifier.pt',
-        lr=args.lr,
-        use_gpu=args.use_gpu,
-        epochs=args.epochs,
-        batch_size=8,
-        hidden_dropout_prob=args.hidden_dropout_prob,
-        train='data/ids-cfimdb-train.csv',
-        dev='data/ids-cfimdb-dev.csv',
-        test='data/ids-cfimdb-test-student.csv',
-        option=args.option,
-        dev_out = 'predictions/'+args.option+'-cfimdb-dev-out.csv',
-        test_out = 'predictions/'+args.option+'-cfimdb-test-out.csv'
-    )
-
-    train(config)
-
-    print('Evaluating on cfimdb...')
-    test(config)
-    '''
