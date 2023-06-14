@@ -1,30 +1,59 @@
->📋  A template README.md for code accompanying a Machine Learning paper
+# BERT and Multitask BERT for Sentiment Analysis, Semantic Similarity and Paraphrase detection
 
-# My Paper Title
-
-This repository is the official implementation of [My Paper Title](https://arxiv.org/abs/2030.12345). 
+This is our group repository for the final project for the Deep Learning for Natural Language Processing course at the University of Göttingen SS23 ([Full instructions here](https://1drv.ms/b/s!AkgwFZyClZ_qk718ObYhi8tF4cjSSQ?e=3gECnf))
 
 >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
 
 ## Requirements
 
-To install requirements:
+Anaconda or Miniconda is required. For setup of the project run:
 
 ```setup
-pip install -r requirements.txt
+$~: git clone https://gitlab.gwdg.de/yangshan.xiang/do-nlp-with-linguistic-mavericks.git
+$~: ./minibert-default-final-project/setup.sh 
 ```
 
 >📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
 
 ## Training
 
-To train the model(s) in the paper, run this command:
+To train the sentiment classifier from part 1 of the project, run:
 
 ```train
-python train.py --input-data <path_to_data> --alpha 10 --beta 20
+$~: conda activate dnlp
+$~: python classifier.py --option pretrain --epochs 10 --lr 1e-3 --batchsize=64 --hiddendropoutprob=0.3
+$~: python classifier.py --option finetune --epochs 10 --lr 1e-5 --batchsize=64 --hiddendropoutprob=0.3
 ```
 
->📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
+To run any form of training on the GWDG HPC cluster: 
+
+```
+# Connect to frontend node
+you@local   ~$: ssh -i path/to/key <user>@glogin9.hlrn.de
+<user>@node ~$: cd /scratch/usr/<user>/
+
+# If not already done, set up the conda environment and clone this repository
+<user>@node ~$: cd do-nlp-with-linguistic-mavericks/minbert-default-final-project/
+
+# specify the desired node and node configuration in submit_train.sh
+#   Consider changing:
+#       - Time Limit/ desired node and configuration
+#       - desired training command to be executed (!! Dont forget to use '--use-gpu' flag !!)
+#       - E-Mail for receiving updates
+<user>@node ~$: vim submit_train.sh # incorporate desired changes but do not commit them in here 
+
+# submit job
+<user>@node ~$: sbatch submit_train.sh
+```
+
+To view the training process, you can see the output in the `slurm_files`folder in `<job_id>.out and .err`files.
+You will receive details about your job and the name of the processing node on the email you wrote in `submit_train.sh`
+Additionally, you can connect to the node running the training from the frontend node using and see live statistics of your job:
+```
+<user>@node         ~$: ssh <name of processing node>
+<user>@process_node ~$: module load nvitop
+<user>@process_node ~$: nvitop
+```
 
 ## Evaluation
 
@@ -70,7 +99,7 @@ required section as per project description section 9.3.
 
 ### Part 1 
 
-#### Debwashis
+#### Dhiraj
 * Contribution 1
 * ...
 
@@ -92,7 +121,7 @@ required section as per project description section 9.3.
 
 ### Part 2 
 
-#### Debwashis
+#### Dhiraj
 * Contribution 1
 * ...
 
