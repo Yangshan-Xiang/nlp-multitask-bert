@@ -21,8 +21,8 @@ To train the sentiment classifier from part 1 of the project, run:
 
 ```train
 $~: conda activate dnlp
-$~: python classifier.py --option pretrain --epochs 10 --lr 1e-3 --batchsize=64 --hiddendropoutprob=0.3
-$~: python classifier.py --option finetune --epochs 10 --lr 1e-5 --batchsize=64 --hiddendropoutprob=0.3
+$~: python classifier.py --option pretrain --epochs 10 --lr 1e-3 --batch_size 64 --hidden_dropout_prob 0.3
+$~: python classifier.py --option finetune --epochs 10 --lr 1e-5 --batch_size 64 --hidden_dropout_prob 0.3
 ```
 
 To run any form of training on the GWDG HPC cluster: 
