@@ -13,10 +13,10 @@ from tqdm import tqdm
 from datasets import SentenceClassificationDataset, SentencePairDataset, \
     load_multitask_data, load_multitask_test_data
 
-from evaluation import model_eval_sst, test_model_multitask
+from evaluation import model_eval_sst, model_eval_para, model_eval_sts, test_model_multitask
 
 
-TQDM_DISABLE=True
+TQDM_DISABLE=False
 
 # fix the random seed
 def seed_everything(seed=11711):
@@ -44,15 +44,15 @@ class MultitaskBERT(nn.Module):
     def __init__(self, config):
         super(MultitaskBERT, self).__init__()
         # You will want to add layers here to perform the downstream tasks.
-        # Pretrain mode does not require updating bert paramters.
         self.bert = BertModel.from_pretrained('bert-base-uncased')
+        ### TODO
+
+        # Pretrain mode does not require updating bert paramters.
         for param in self.bert.parameters():
             if config.option == 'pretrain':
                 param.requires_grad = False
             elif config.option == 'finetune':
                 param.requires_grad = True
-        ### TODO
-        raise NotImplementedError
 
 
     def forward(self, input_ids, attention_mask):
@@ -62,7 +62,7 @@ class MultitaskBERT(nn.Module):
         # When thinking of improvements, you can later try modifying this
         # (e.g., by adding other layers).
         ### TODO
-        raise NotImplementedError
+        return self.bert(input_ids, attention_mask)['pooler_output']
 
 
     def predict_sentiment(self, input_ids, attention_mask):
@@ -90,8 +90,7 @@ class MultitaskBERT(nn.Module):
                            input_ids_1, attention_mask_1,
                            input_ids_2, attention_mask_2):
         '''Given a batch of pairs of sentences, outputs a single logit corresponding to how similar they are.
-        Note that your output should be unnormalized (a logit); it will be passed to the sigmoid function
-        during evaluation, and handled as a logit by the appropriate loss function.
+        Note that your output should be unnormalized (a logit).
         '''
         ### TODO
         raise NotImplementedError
@@ -122,6 +121,7 @@ def train_multitask(args):
     sst_train_data, num_labels,para_train_data, sts_train_data = load_multitask_data(args.sst_train,args.para_train,args.sts_train, split ='train')
     sst_dev_data, num_labels,para_dev_data, sts_dev_data = load_multitask_data(args.sst_dev,args.para_dev,args.sts_dev, split ='train')
 
+    # Load data for sentiment analysis
     sst_train_data = SentenceClassificationDataset(sst_train_data, args)
     sst_dev_data = SentenceClassificationDataset(sst_dev_data, args)
 
@@ -129,6 +129,24 @@ def train_multitask(args):
                                       collate_fn=sst_train_data.collate_fn)
     sst_dev_dataloader = DataLoader(sst_dev_data, shuffle=False, batch_size=args.batch_size,
                                     collate_fn=sst_dev_data.collate_fn)
+
+    # Load data for paraphrase detection
+    para_train_data = SentencePairDataset(para_train_data, args)
+    para_dev_data = SentencePairDataset(para_dev_data, args)
+
+    para_train_dataloader = DataLoader(para_train_data, shuffle=True, batch_size=args.batch_size,
+                                      collate_fn=para_train_data.collate_fn)
+    para_dev_dataloader = DataLoader(para_dev_data, shuffle=False, batch_size=args.batch_size,
+                                    collate_fn=para_train_data.collate_fn)
+
+    # Load data for semantic textual similarity
+    sts_train_data = SentencePairDataset(sts_train_data, args, isRegression=True)
+    sts_dev_data = SentencePairDataset(sts_dev_data, args, isRegression=True)
+
+    sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=args.batch_size,
+                                      collate_fn=sts_train_data.collate_fn)
+    sts_dev_dataloader = DataLoader(sts_dev_data, shuffle=False, batch_size=args.batch_size,
+                                    collate_fn=sts_train_data.collate_fn)
 
     # Init model
     config = {'hidden_dropout_prob': args.hidden_dropout_prob,
@@ -149,36 +167,108 @@ def train_multitask(args):
     # Run for the specified number of epochs
     for epoch in range(args.epochs):
         model.train()
-        train_loss = 0
-        num_batches = 0
-        for batch in tqdm(sst_train_dataloader, desc=f'train-{epoch}', disable=TQDM_DISABLE):
-            b_ids, b_mask, b_labels = (batch['token_ids'],
-                                       batch['attention_mask'], batch['labels'])
 
-            b_ids = b_ids.to(device)
-            b_mask = b_mask.to(device)
-            b_labels = b_labels.to(device)
+        # Enable all tasks
+        task = {
+            'sst': True,
+            'para': True,
+            'sts': True,
+        }
 
-            optimizer.zero_grad()
-            logits = model.predict_sentiment(b_ids, b_mask)
-            loss = F.cross_entropy(logits, b_labels.view(-1), reduction='sum') / args.batch_size
+        if task['sst']: # Train sentiment analysis
+            train_sst_loss = 0
+            num_batches = 0
+            for batch in tqdm(sst_train_dataloader, desc=f'train-{epoch}-sst', disable=TQDM_DISABLE):
+                b_ids, b_mask, b_labels = (batch['token_ids'],
+                                        batch['attention_mask'], batch['labels'])
 
-            loss.backward()
-            optimizer.step()
+                b_ids = b_ids.to(device)
+                b_mask = b_mask.to(device)
+                b_labels = b_labels.to(device)
 
-            train_loss += loss.item()
-            num_batches += 1
+                optimizer.zero_grad()
+                logits = model.predict_sentiment(b_ids, b_mask)
+                loss = F.cross_entropy(logits, b_labels.view(-1), reduction='sum') / args.batch_size
 
-        train_loss = train_loss / (num_batches)
+                loss.backward()
+                optimizer.step()
 
-        train_acc, train_f1, *_ = model_eval_sst(sst_train_dataloader, model, device)
-        dev_acc, dev_f1, *_ = model_eval_sst(sst_dev_dataloader, model, device)
+                train_sst_loss += loss.item()
+                num_batches += 1
 
+            train_sst_loss = train_sst_loss / (num_batches)
+
+        if task['para']: # Train paraphrase detection
+            train_para_loss = 0
+            num_batches = 0
+            for batch in tqdm(para_train_dataloader, desc=f'train-{epoch}-para', disable=TQDM_DISABLE):
+                b_ids_1, b_mask_1, b_ids_2, b_mask_2, b_labels = (batch['token_ids_1'], batch['attention_mask_1'],
+                                                                batch['token_ids_2'], batch['attention_mask_2'],
+                                                                batch['labels'])
+
+                b_ids_1 = b_ids_1.to(device)
+                b_mask_1 = b_mask_1.to(device)
+                b_ids_2 = b_ids_2.to(device)
+                b_mask_2 = b_mask_2.to(device)
+                b_labels = b_labels.to(device)
+
+                optimizer.zero_grad()
+                logits = model.predict_paraphrase(b_ids_1, b_mask_1, b_ids_2, b_mask_2)
+                loss = F.binary_cross_entropy_with_logits(logits, b_labels.unsqueeze(1).float(), reduction='mean')
+
+                loss.backward()
+                optimizer.step()
+
+                train_para_loss += loss.item()
+                num_batches += 1
+
+            train_para_loss = train_para_loss / (num_batches)
+
+        if task['sts']: # Train semantic textual similarity
+            train_sts_loss = 0
+            num_batches = 0
+            for batch in tqdm(sts_train_dataloader, desc=f'train-{epoch}-sts', disable=TQDM_DISABLE):
+                b_ids_1, b_mask_1, b_ids_2, b_mask_2, b_labels = (batch['token_ids_1'], batch['attention_mask_1'],
+                                                                batch['token_ids_2'], batch['attention_mask_2'],
+                                                                batch['labels'])
+
+                b_ids_1 = b_ids_1.to(device)
+                b_mask_1 = b_mask_1.to(device)
+                b_ids_2 = b_ids_2.to(device)
+                b_mask_2 = b_mask_2.to(device)
+                b_labels = b_labels.to(device)
+
+                optimizer.zero_grad()
+                logits = model.predict_similarity(b_ids_1, b_mask_1, b_ids_2, b_mask_2)
+                loss = F.binary_cross_entropy_with_logits(logits, b_labels.unsqueeze(1).float() / 5.0, reduction='mean')
+
+                loss.backward()
+                optimizer.step()
+
+                train_sts_loss += loss.item()
+                num_batches += 1
+
+            train_sts_loss = train_sts_loss / (num_batches)
+
+        if task['sst']: # Evaluate sentiment analysis
+            train_sst_acc, *_ = model_eval_sst(sst_train_dataloader, model, device)
+            dev_sst_acc, *_ = model_eval_sst(sst_dev_dataloader, model, device)
+            print(f"Epoch {epoch} [SST]: train loss :: {train_sst_loss:.3f}, train acc :: {train_sst_acc:.3f}, dev acc :: {dev_sst_acc:.3f}")
+
+        if task['para']: # Evaluate paraphrase detection
+            train_para_acc, *_ = model_eval_para(para_train_dataloader, model, device)
+            dev_para_acc, *_ = model_eval_para(para_dev_dataloader, model, device)
+            print(f"Epoch {epoch} [PARA]: train loss :: {train_para_loss:.3f}, train acc :: {train_para_acc:.3f}, dev acc :: {dev_para_acc:.3f}")
+
+        if task['sts']: # Evaluate semantic textual similarity
+            train_sts_corr, *_ = model_eval_sts(sts_train_dataloader, model, device)
+            dev_sts_corr, *_ = model_eval_sts(sts_dev_dataloader, model, device)
+            print(f"Epoch {epoch} [STS]: train loss :: {train_sts_loss:.3f}, train corr :: {train_sts_corr:.3f}, dev corr :: {dev_sts_corr:.3f}")
+
+        dev_acc = 0 # TODO
         if dev_acc > best_dev_acc:
             best_dev_acc = dev_acc
             save_model(model, optimizer, args, config, args.filepath)
-
-        print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, train acc :: {train_acc :.3f}, dev acc :: {dev_acc :.3f}")
 
 
 
