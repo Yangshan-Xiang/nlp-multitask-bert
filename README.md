@@ -97,33 +97,13 @@ Our model achieves the following performance on :
 
 required section as per project description section 9.3. 
 
-### Part 1 
+### Part 1
 
-#### Dhiraj
-* Contribution 1
-* ...
+#### Yangshan, De Xiong Michael, Leander, Jonas 
+* we all implemented the reqired code independently for learning purposes
+* for our main branch, we merged Michaels version of the optimizer and Leanders self-attention mechanism
 
-#### Yangshan
-* Contribution 1
-* ...
-
-#### De Xiong Michael
-* Contribution 1
-* ...
-
-#### Leander
-* Contribution 1
-* ...
-
-#### Jonas
-* Contribution 1
-* ...
-
-### Part 2 
-
-#### Dhiraj
-* Contribution 1
-* ...
+### Part 2
 
 #### Yangshan
 * Contribution 1
