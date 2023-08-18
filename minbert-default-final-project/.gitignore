@@ -39,3 +39,6 @@ __pycache__
 #vscode 
 .vscode
 
+#playground
+playground.py
+
