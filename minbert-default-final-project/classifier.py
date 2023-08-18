@@ -249,7 +249,7 @@ def train(args):
               'data_dir': '.',
               'option': args.option,
               'local_files_only': args.local_files_only}
-    }
+
 
     config = SimpleNamespace(**config)
 
