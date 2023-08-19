@@ -54,7 +54,8 @@ class BertSentimentClassifier(torch.nn.Module):
 
         bert_out = self.bert(input_ids, attention_mask)
         hidden_dropout = self.dropout(bert_out['pooler_output'])
-        return self.classification(hidden_dropout)
+        scores = F.softmax(self.classification(hidden_dropout))
+        return scores
 
 
 
@@ -337,7 +338,7 @@ def get_args():
     parser.add_argument("--use_gpu", action='store_true')
     parser.add_argument("--dev_out", type=str, default="sst-dev-out.csv")
     parser.add_argument("--test_out", type=str, default="sst-test-out.csv")
-                                    
+    parser.add_argument("--local_files_only", type=str, default="True")
 
     parser.add_argument("--batch_size", help='sst: 64 can fit a 12GB GPU', type=int, default=64)
     parser.add_argument("--hidden_dropout_prob", type=float, default=0.3)
