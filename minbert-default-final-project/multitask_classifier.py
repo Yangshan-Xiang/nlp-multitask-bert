@@ -53,7 +53,16 @@ class MultitaskBERT(nn.Module):
                 param.requires_grad = False
             elif config.option == 'finetune':
                 param.requires_grad = True
-
+        # Sentiment classification
+        self.sentiment = nn.Linear(BERT_HIDDEN_SIZE, N_SENTIMENT_CLASSES)
+        self.paraphrase_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
+        self.paraphrase_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
+        self.paraphrase_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
+        self.similarity_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
+        self.similarity_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
+        self.similarity_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
+        self.af = nn.ReLU()
+        self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, attention_mask):
         'Takes a batch of sentences and produces embeddings for them.'
@@ -62,7 +71,7 @@ class MultitaskBERT(nn.Module):
         # When thinking of improvements, you can later try modifying this
         # (e.g., by adding other layers).
         ### TODO
-        return self.bert(input_ids, attention_mask)['pooler_output']
+        return self.bert(input_ids, attention_mask)
 
 
     def predict_sentiment(self, input_ids, attention_mask):
@@ -72,7 +81,11 @@ class MultitaskBERT(nn.Module):
         Thus, your output should contain 5 logits for each sentence.
         '''
         ### TODO
-        raise NotImplementedError
+
+        out = self.forward(input_ids, attention_mask)['pooler_output']
+        out = self.sentiment(self.dropout(out))
+        scores = F.softmax(out)
+        return scores
 
 
     def predict_paraphrase(self,
@@ -83,7 +96,17 @@ class MultitaskBERT(nn.Module):
         during evaluation, and handled as a logit by the appropriate loss function.
         '''
         ### TODO
-        raise NotImplementedError
+
+        out_1 = self.forward(input_ids_1, attention_mask_1)['pooler_output']
+        out_2 = self.forward(input_ids_2, attention_mask_2)['pooler_output']
+        out_1 = self.dropout(self.af(self.paraphrase_1(out_1)))
+        out_2 = self.dropout(self.af(self.paraphrase_2(out_2)))
+        out = torch.cat((out_1, out_2), 1)
+        out = self.af(self.paraphrase_3(out))
+        out = torch.sigmoid(out)
+        return out
+
+
 
 
     def predict_similarity(self,
@@ -93,7 +116,20 @@ class MultitaskBERT(nn.Module):
         Note that your output should be unnormalized (a logit).
         '''
         ### TODO
-        raise NotImplementedError
+        # hidd_1 = self.forward(input_ids_1, attention_mask_1)['last_hidden_state'] * attention_mask_1.unsqueeze(-1)
+        # hidd_2 = self.forward(input_ids_2, attention_mask_2)['last_hidden_state'] * attention_mask_2.unsqueeze(-1)
+        out_1 = self.forward(input_ids_1, attention_mask_1)['pooler_output']
+        out_2 = self.forward(input_ids_2, attention_mask_2)['pooler_output']
+        out_1 = self.dropout(self.af(self.similarity_1(out_1)))
+        out_2 = self.dropout(self.af(self.similarity_2(out_2)))
+        out = torch.cat((out_1, out_2), 1)
+        out = self.af(self.similarity_3(out))
+        return out
+
+
+
+
+
 
 
 
@@ -171,7 +207,7 @@ def train_multitask(args):
 
         # Enable all tasks
         task = {
-            'sst': True,
+            'sst': False,
             'para': True,
             'sts': True,
         }
@@ -215,6 +251,7 @@ def train_multitask(args):
 
                 optimizer.zero_grad()
                 logits = model.predict_paraphrase(b_ids_1, b_mask_1, b_ids_2, b_mask_2)
+                logits = logits.to(device)
                 loss = F.binary_cross_entropy_with_logits(logits, b_labels.unsqueeze(1).float(), reduction='mean')
 
                 loss.backward()
@@ -241,6 +278,7 @@ def train_multitask(args):
 
                 optimizer.zero_grad()
                 logits = model.predict_similarity(b_ids_1, b_mask_1, b_ids_2, b_mask_2)
+                logits = logits.to(device)
                 loss = F.binary_cross_entropy_with_logits(logits, b_labels.unsqueeze(1).float() / 5.0, reduction='mean')
 
                 loss.backward()
@@ -323,6 +361,9 @@ def get_args():
     parser.add_argument("--lr", type=float, help="learning rate, default lr for 'pretrain': 1e-3, 'finetune': 1e-5",
                         default=1e-3)
     parser.add_argument("--local_files_only", action='store_true')
+    parser.add_argument("--hidden_size", type=int, default=768)
+    parser.add_argument("--max_position_embeddings", type=int, default=768)
+
 
     args = parser.parse_args()
     return args

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=train-nn-gpu
-#SBATCH -t 00:30:00                  # set time limit
-#SBATCH -p grete:interactive         # -p grete:shared for training, -p grete:interactive for debugging 
+#SBATCH -t 02:00:00                  # set time limit
+#SBATCH -p grete:shared         # -p grete:shared for training, -p grete:interactive for debugging 
 
 #SBATCH -G V100:1                    # take 1 GPU, see https://www.hlrn.de/doc/display/PUB/GPU+Usage for more options
 ##SBATCH --mem-per-gpu=5G             # setting the right constraints for the splitted gpu partitions
@@ -12,7 +12,7 @@
 
 ## mail settings for job info
 #SBATCH --mail-type=all              # send mail when job begins and ends
-#SBATCH --mail-user=j.rieling@stud.uni-goettingen.de  # mailaddress
+#SBATCH --mail-user=yangshan.xiang@stud.uni-goettingen.de  # mailaddress
 #SBATCH --output=./slurm_files/slurm-%x-%j.out        # where to write output, %x give job name, %j names job id
 #SBATCH --error=./slurm_files/slurm-%x-%j.err         # where to write slurm error
 
@@ -27,6 +27,5 @@ echo "Working directory: $PWD"
 echo "Current node: ${SLURM_NODELIST}"
 
 # Run the script(s):
-python -u classifier.py --option pretrain --use_gpu --lr 1e-3 --batch_size 64 --hidden_dropout 0.3
-python -u classifier.py --option finetune --use_gpu --lr 1e-5 --batch_size 64 --hidden_dropout 0.3
+python -u multitask_classifier.py --option finetune --use_gpu --lr 1e-5 --batch_size 64 --hidden_dropout_prob 0.3
 
