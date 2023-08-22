@@ -17,9 +17,6 @@ Thumbs.db
 # Compiled Python files
 *.pyc
 
-# Compiled C++ files
-*.out
-
 # Application specific files
 
 node_modules
