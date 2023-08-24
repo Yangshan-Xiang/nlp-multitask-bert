@@ -33,6 +33,67 @@ BERT_HIDDEN_SIZE = 768
 N_SENTIMENT_CLASSES = 5
 
 
+class ResidualBlock(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        in_channels = 3
+        out_channels = 3
+        kernel_size = 3
+
+        self.conv1 = nn.Sequential(nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding='same'),
+                                   nn.BatchNorm2d(out_channels),
+                                   nn.ReLU())
+        self.conv2 = nn.Sequential(nn.Conv2d(out_channels, out_channels, kernel_size, stride=1, padding='same'),
+                                   nn.BatchNorm2d(out_channels),
+                                   nn.ReLU())
+        self.af = nn.ReLU()
+
+    def forward(self, x):
+        residual = x
+        x = self.conv1(x)
+        out = self.conv2(x)
+        out = out + residual
+        out = self.af(out)
+        return out
+
+
+class CNN(nn.Module):
+    def __init__(self, classes):
+        super().__init__()
+
+        out_channels = 3
+
+        self.Start = nn.Conv2d(in_channels=1, out_channels=3, kernel_size=3, stride=1, padding='same')
+        self.Res1 = ResidualBlock()
+        self.Res2 = ResidualBlock()
+        self.Res3 = ResidualBlock()
+        self.Res4 = ResidualBlock()
+        self.spp1 = nn.AdaptiveMaxPool2d((1, 1))
+        self.spp2 = nn.AdaptiveMaxPool2d((2, 2))
+        self.spp3 = nn.AdaptiveMaxPool2d((4, 4))
+
+        self.fc = nn.Linear(21 * out_channels, classes)
+
+    def forward(self, hidden_states):
+        x = hidden_states.unsqueeze(1)
+        x = self.Start(x)
+        x = self.Res1(x)
+        x = self.Res2(x)
+        x = self.Res3(x)
+        x = self.Res4(x)
+        spp1 = self.spp1(x)
+        spp1 = spp1.flatten(1)
+        spp2 = self.spp2(x)
+        spp2 = spp2.flatten(1)
+        spp3 = self.spp3(x)
+        spp3 = spp3.flatten(1)
+        spp = torch.cat((spp1, spp2, spp3), 1)
+        out = self.fc(spp)
+
+        return out
+
+
 class MultitaskBERT(nn.Module):
     '''
     This module should use BERT for 3 tasks:
@@ -48,14 +109,16 @@ class MultitaskBERT(nn.Module):
         self.bert = BertModel.from_pretrained('bert-base-uncased', local_files_only=config.local_files_only)
         ### TODO
 
-        # Pretrain mode does not require updating bert paramters.
+        # Pretrain mode does not require updating bert parameters.
         for param in self.bert.parameters():
             if config.option == 'pretrain':
                 param.requires_grad = False
             elif config.option == 'finetune':
                 param.requires_grad = True
         # Sentiment classification
+        self.CNN = CNN(5)
         self.sentiment = nn.Linear(BERT_HIDDEN_SIZE, N_SENTIMENT_CLASSES)
+        self.combine = nn.Linear(10, 5)
         self.paraphrase_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.paraphrase_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.paraphrase_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
@@ -84,9 +147,14 @@ class MultitaskBERT(nn.Module):
         Thus, your output should contain 5 logits for each sentence.
         '''
         ### TODO
-        out = self.forward(input_ids, attention_mask)['pooler_output']
-        out = self.sentiment(self.dropout(out))
-        scores = F.softmax(out)
+        embeddings = self.forward(input_ids, attention_mask)
+        pooler_output = embeddings['pooler_output']
+        last_hidden_state = embeddings['last_hidden_state']
+        out1 = self.sentiment(self.dropout(pooler_output))
+        out2 = self.CNN(last_hidden_state)
+        out = torch.cat((out1, out2), 1)
+        out = self.combine(out)
+        scores = F.softmax(out, dim=1)
         return scores
 
     def predict_paraphrase(self,
@@ -209,7 +277,7 @@ def train_multitask(args):
         task = {
             'sst': True,
             'para': False,
-            'sts': True,
+            'sts': False,
         }
 
         if task['sst']:  # Train sentiment analysis
@@ -310,8 +378,8 @@ def train_multitask(args):
             print(
                 f"Epoch {epoch} [STS]: train loss :: {train_sts_loss:.3f}, train corr :: {train_sts_corr:.3f}, dev corr :: {dev_sts_corr:.3f}")
 
-        if dev_sts_corr > best_dev_acc:
-            best_dev_acc = dev_sts_corr
+        if dev_sst_acc > best_dev_acc:
+            best_dev_acc = dev_sst_acc
             save_model(model, optimizer, args, config, args.filepath)
 
 
