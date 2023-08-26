@@ -33,65 +33,31 @@ BERT_HIDDEN_SIZE = 768
 N_SENTIMENT_CLASSES = 5
 
 
-class ResidualBlock(nn.Module):
+class TextCNN(nn.Module):
     def __init__(self):
         super().__init__()
 
-        in_channels = 3
-        out_channels = 3
-        kernel_size = 3
-
-        self.conv1 = nn.Sequential(nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding='same'),
-                                   nn.BatchNorm2d(out_channels),
-                                   nn.ReLU())
-        self.conv2 = nn.Sequential(nn.Conv2d(out_channels, out_channels, kernel_size, stride=1, padding='same'),
-                                   nn.BatchNorm2d(out_channels),
-                                   nn.ReLU())
+        self.dropout = nn.Dropout(0.5)
+        self.pool = nn.AdaptiveAvgPool1d(1)
         self.af = nn.ReLU()
+        self.conv1 = nn.Conv1d(2 * 768, 100, 3)
+        self.conv2 = nn.Conv1d(2 * 768, 100, 4)
+        self.conv3 = nn.Conv1d(2 * 768, 100, 5)
+        self.fc = nn.Linear(100 * 3, 5)
 
-    def forward(self, x):
-        residual = x
-        x = self.conv1(x)
-        out = self.conv2(x)
-        out = out + residual
-        out = self.af(out)
-        return out
+    def forward(self, embedding, constant_embedding):
+        embedding = torch.cat((embedding, constant_embedding), dim=2)
+        embedding = embedding.permute(0, 2, 1)
+        x = torch.squeeze(self.af(self.pool(self.conv1(embedding))), dim=-1)
 
+        y = torch.squeeze(self.af(self.pool(self.conv2(embedding))), dim=-1)
 
-class CNN(nn.Module):
-    def __init__(self, classes):
-        super().__init__()
+        z = torch.squeeze(self.af(self.pool(self.conv3(embedding))), dim=-1)
 
-        out_channels = 3
+        core = torch.cat((x, y, z), dim=1)
+        output = self.fc(self.dropout(core))
 
-        self.Start = nn.Conv2d(in_channels=1, out_channels=3, kernel_size=3, stride=1, padding='same')
-        self.Res1 = ResidualBlock()
-        self.Res2 = ResidualBlock()
-        self.Res3 = ResidualBlock()
-        self.Res4 = ResidualBlock()
-        self.spp1 = nn.AdaptiveMaxPool2d((1, 1))
-        self.spp2 = nn.AdaptiveMaxPool2d((2, 2))
-        self.spp3 = nn.AdaptiveMaxPool2d((4, 4))
-
-        self.fc = nn.Linear(21 * out_channels, classes)
-
-    def forward(self, hidden_states):
-        x = hidden_states.unsqueeze(1)
-        x = self.Start(x)
-        x = self.Res1(x)
-        x = self.Res2(x)
-        x = self.Res3(x)
-        x = self.Res4(x)
-        spp1 = self.spp1(x)
-        spp1 = spp1.flatten(1)
-        spp2 = self.spp2(x)
-        spp2 = spp2.flatten(1)
-        spp3 = self.spp3(x)
-        spp3 = spp3.flatten(1)
-        spp = torch.cat((spp1, spp2, spp3), 1)
-        out = self.fc(spp)
-
-        return out
+        return output
 
 
 class MultitaskBERT(nn.Module):
@@ -116,9 +82,12 @@ class MultitaskBERT(nn.Module):
             elif config.option == 'finetune':
                 param.requires_grad = True
         # Sentiment classification
-        self.CNN = CNN(5)
-        self.sentiment = nn.Linear(BERT_HIDDEN_SIZE, N_SENTIMENT_CLASSES)
-        self.combine = nn.Linear(10, 5)
+        self.TextCNN = TextCNN()
+        self.sst_fc1 = nn.Linear(BERT_HIDDEN_SIZE, int(BERT_HIDDEN_SIZE/2))
+        self.sst_fc2 = nn.Linear(int(BERT_HIDDEN_SIZE / 2), N_SENTIMENT_CLASSES)
+        self.overall_dropout = nn.Dropout(p=config.hidden_dropout_prob)
+
+
         self.paraphrase_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.paraphrase_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.paraphrase_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
@@ -128,7 +97,7 @@ class MultitaskBERT(nn.Module):
         self.similarity_4 = nn.Linear(BERT_HIDDEN_SIZE, 1)
         self.similarity_5 = nn.Linear(2, 1)
 
-        self.af = nn.ELU()
+        self.af = nn.ReLU()
         self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, attention_mask):
@@ -147,15 +116,18 @@ class MultitaskBERT(nn.Module):
         Thus, your output should contain 5 logits for each sentence.
         '''
         ### TODO
-        embeddings = self.forward(input_ids, attention_mask)
-        pooler_output = embeddings['pooler_output']
-        last_hidden_state = embeddings['last_hidden_state']
-        out1 = self.sentiment(self.dropout(pooler_output))
-        out2 = self.CNN(last_hidden_state)
-        out = torch.cat((out1, out2), 1)
-        out = self.combine(out)
-        scores = F.softmax(out, dim=1)
-        return scores
+        x = self.forward(input_ids, attention_mask)
+        constant_embedding = self.bert.embed(input_ids).detach() * attention_mask.unsqueeze(-1)
+        last_hidden_state = x['last_hidden_state'] * attention_mask.unsqueeze(-1)
+        pooler_output = x['pooler_output']
+
+        output = self.TextCNN(last_hidden_state, constant_embedding)
+        y = self.sst_fc1(pooler_output)
+        y = self.overall_dropout(y)
+        y = self.sst_fc2(y)
+        final_output = (output + y) / 2
+
+        return final_output
 
     def predict_paraphrase(self,
                            input_ids_1, attention_mask_1,

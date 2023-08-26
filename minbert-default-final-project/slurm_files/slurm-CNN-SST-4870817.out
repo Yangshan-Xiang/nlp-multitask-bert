@@ -1,33 +1,32 @@
 ================================================================================
-JobID = 4867063
+JobID = 4870817
 User = bzkurs47, Account = bzkurs47
-Partition = grete:shared, Nodelist = ggpu136
+Partition = grete:shared, Nodelist = ggpu02
 ================================================================================
 Submitting job with sbatch from directory: /home/bzkurs47/minbert-default-final-project
 Home directory: /home/bzkurs47
 Working directory: /home/bzkurs47/minbert-default-final-project
-Current node: ggpu136
+Current node: ggpu02
 Loaded 8544 train examples from data/ids-sst-train.csv
 Loaded 141498 train examples from data/quora-train.csv
 Loaded 6040 train examples from data/sts-train.csv
 Loaded 1101 train examples from data/ids-sst-dev.csv
 Loaded 20212 train examples from data/quora-dev.csv
 Loaded 863 train examples from data/sts-dev.csv
-Epoch 0 [SST]: train loss :: 1.570, train acc :: 0.382, dev acc :: 0.357
+Epoch 0 [SST]: train loss :: 1.430, train acc :: 0.508, dev acc :: 0.464
 save the model to finetune-10-1e-05-multitask.pt
-Epoch 1 [SST]: train loss :: 1.476, train acc :: 0.486, dev acc :: 0.446
+Epoch 1 [SST]: train loss :: 1.117, train acc :: 0.578, dev acc :: 0.481
 save the model to finetune-10-1e-05-multitask.pt
-Epoch 2 [SST]: train loss :: 1.425, train acc :: 0.494, dev acc :: 0.445
-Epoch 3 [SST]: train loss :: 1.399, train acc :: 0.524, dev acc :: 0.451
+Epoch 2 [SST]: train loss :: 0.972, train acc :: 0.681, dev acc :: 0.510
 save the model to finetune-10-1e-05-multitask.pt
-Epoch 4 [SST]: train loss :: 1.374, train acc :: 0.568, dev acc :: 0.474
+Epoch 3 [SST]: train loss :: 0.852, train acc :: 0.764, dev acc :: 0.517
 save the model to finetune-10-1e-05-multitask.pt
-Epoch 5 [SST]: train loss :: 1.352, train acc :: 0.580, dev acc :: 0.469
-Epoch 6 [SST]: train loss :: 1.321, train acc :: 0.598, dev acc :: 0.474
-Epoch 7 [SST]: train loss :: 1.287, train acc :: 0.657, dev acc :: 0.511
-save the model to finetune-10-1e-05-multitask.pt
-Epoch 8 [SST]: train loss :: 1.256, train acc :: 0.680, dev acc :: 0.495
-Epoch 9 [SST]: train loss :: 1.229, train acc :: 0.723, dev acc :: 0.490
+Epoch 4 [SST]: train loss :: 0.751, train acc :: 0.803, dev acc :: 0.500
+Epoch 5 [SST]: train loss :: 0.638, train acc :: 0.845, dev acc :: 0.497
+Epoch 6 [SST]: train loss :: 0.545, train acc :: 0.906, dev acc :: 0.501
+Epoch 7 [SST]: train loss :: 0.455, train acc :: 0.908, dev acc :: 0.502
+Epoch 8 [SST]: train loss :: 0.370, train acc :: 0.949, dev acc :: 0.504
+Epoch 9 [SST]: train loss :: 0.330, train acc :: 0.955, dev acc :: 0.505
 Loaded model to test from finetune-10-1e-05-multitask.pt
 Loaded 2210 test examples from data/ids-sst-test-student.csv
 Loaded 40429 test examples from data/quora-test-student.csv
@@ -36,15 +35,15 @@ Loaded 1101 dev examples from data/ids-sst-dev.csv
 Loaded 20212 dev examples from data/quora-dev.csv
 Loaded 863 dev examples from data/sts-dev.csv
 Paraphrase detection accuracy: 0.375
-Sentiment classification accuracy: 0.511
-Semantic Textual Similarity correlation: -0.035
-dev sentiment acc :: 0.511
+Sentiment classification accuracy: 0.517
+Semantic Textual Similarity correlation: 0.098
+dev sentiment acc :: 0.517
 dev paraphrase acc :: 0.375
-dev sts corr :: -0.035
+dev sts corr :: 0.098
 ============ Job Information ===================================================
-Submitted: 2023-08-24T13:43:12
-Started: 2023-08-24T13:43:19
-Ended: 2023-08-24T14:04:21
-Elapsed: 22 min, Limit: 120 min, Difference: 98 min
+Submitted: 2023-08-25T23:39:43
+Started: 2023-08-25T23:40:11
+Ended: 2023-08-26T00:03:09
+Elapsed: 23 min, Limit: 120 min, Difference: 97 min
 CPUs: 4, Nodes: 1
 Estimated NPL: ================================================================================
