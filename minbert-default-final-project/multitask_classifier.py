@@ -43,7 +43,6 @@ class TextCNN(nn.Module):
         self.conv1 = nn.Conv1d(2 * 768, 100, 3)
         self.conv2 = nn.Conv1d(2 * 768, 100, 4)
         self.conv3 = nn.Conv1d(2 * 768, 100, 5)
-        self.fc = nn.Linear(100 * 3, 5)
 
     def forward(self, embedding, constant_embedding):
         embedding = torch.cat((embedding, constant_embedding), dim=2)
@@ -54,8 +53,7 @@ class TextCNN(nn.Module):
 
         z = torch.squeeze(self.af(self.pool(self.conv3(embedding))), dim=-1)
 
-        core = torch.cat((x, y, z), dim=1)
-        output = self.fc(self.dropout(core))
+        output = torch.cat((x, y, z), dim=1)
 
         return output
 
@@ -83,21 +81,26 @@ class MultitaskBERT(nn.Module):
                 param.requires_grad = True
         # Sentiment classification
         self.TextCNN = TextCNN()
-        self.sst_fc1 = nn.Linear(BERT_HIDDEN_SIZE, int(BERT_HIDDEN_SIZE/2))
-        self.sst_fc2 = nn.Linear(int(BERT_HIDDEN_SIZE / 2), N_SENTIMENT_CLASSES)
-        self.overall_dropout = nn.Dropout(p=config.hidden_dropout_prob)
+        self.sst_1 = nn.Linear(300, 100)
+        self.sst_2 = nn.Linear(100, 5)
+        self.sst_fc1 = nn.Linear(BERT_HIDDEN_SIZE, int(BERT_HIDDEN_SIZE / 2))
+        self.sst_fc2 = nn.Linear(int(BERT_HIDDEN_SIZE / 2), 5)
 
+        self.TextCNN_para = TextCNN()
+        self.para_1 = nn.Linear(300 * 2, 300)
+        self.para_2 = nn.Linear(300, 100)
+        self.para_3 = nn.Linear(100, 1)
+        self.para_fc1 = nn.Linear(BERT_HIDDEN_SIZE * 3, BERT_HIDDEN_SIZE * 2)
+        self.para_fc2 = nn.Linear(BERT_HIDDEN_SIZE * 2, BERT_HIDDEN_SIZE)
+        self.para_fc3 = nn.Linear(BERT_HIDDEN_SIZE, 1)
 
-        self.paraphrase_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
-        self.paraphrase_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
-        self.paraphrase_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
         self.similarity_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.similarity_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
         self.similarity_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
         self.similarity_4 = nn.Linear(BERT_HIDDEN_SIZE, 1)
         self.similarity_5 = nn.Linear(2, 1)
 
-        self.af = nn.ReLU()
+        self.af = nn.ELU()
         self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, attention_mask):
@@ -117,17 +120,21 @@ class MultitaskBERT(nn.Module):
         '''
         ### TODO
         x = self.forward(input_ids, attention_mask)
-        constant_embedding = self.bert.embed(input_ids).detach() * attention_mask.unsqueeze(-1)
+        constant_embedding = self.bert.embed(input_ids) * attention_mask.unsqueeze(-1)
         last_hidden_state = x['last_hidden_state'] * attention_mask.unsqueeze(-1)
         pooler_output = x['pooler_output']
 
         output = self.TextCNN(last_hidden_state, constant_embedding)
-        y = self.sst_fc1(pooler_output)
-        y = self.overall_dropout(y)
-        y = self.sst_fc2(y)
-        final_output = (output + y) / 2
+        output = self.af(self.dropout(self.sst_1(output)))
+        output = self.sst_2(output)
 
-        return final_output
+        y = self.sst_fc1(pooler_output)
+        y = self.dropout(y)
+        y = self.sst_fc2(y)
+
+        output = (y + output) / 2
+
+        return output
 
     def predict_paraphrase(self,
                            input_ids_1, attention_mask_1,
@@ -138,14 +145,34 @@ class MultitaskBERT(nn.Module):
         '''
         ### TODO
 
-        out_1 = self.forward(input_ids_1, attention_mask_1)['pooler_output']
-        out_2 = self.forward(input_ids_2, attention_mask_2)['pooler_output']
-        out_1 = self.dropout(self.paraphrase_1(out_1))
-        out_2 = self.dropout(self.paraphrase_2(out_2))
-        out = torch.cat((out_1, out_2), 1)
-        out = self.paraphrase_3(out)
-        out = torch.sigmoid(out)
-        return out
+        embedding_1 = self.forward(input_ids_1, attention_mask_1)
+        embedding_2 = self.forward(input_ids_2, attention_mask_2)
+        pooler_1 = embedding_1['pooler_output']
+        pooler_2 = embedding_2['pooler_output']
+        hidden_1 = embedding_1['last_hidden_state'] * attention_mask_1.unsqueeze(-1)
+        hidden_2 = embedding_2['last_hidden_state'] * attention_mask_2.unsqueeze(-1)
+        constant_embedding_1 = self.bert.embed(input_ids_1) * attention_mask_1.unsqueeze(-1)
+        constant_embedding_2 = self.bert.embed(input_ids_2) * attention_mask_2.unsqueeze(-1)
+
+        core_1 = self.TextCNN_para(hidden_1, constant_embedding_1)
+        core_2 = self.TextCNN_para(hidden_2, constant_embedding_2)
+        core = torch.cat((core_1, core_2), dim=1)
+        output = self.af(self.dropout(self.para_1(core)))
+        output = self.af(self.dropout(self.para_2(output)))
+        output = self.af(self.dropout(self.para_3(output)))
+
+        x3 = torch.abs(pooler_1 - pooler_2)
+        x = torch.cat((pooler_1, pooler_2, x3), dim=1)
+
+        x = self.para_fc1(x)
+        x = self.dropout(x)
+        x = self.para_fc2(x)
+        x = self.dropout(x)
+        x = self.para_fc3(x)
+
+        output = (x + output) / 2
+
+        return output
 
     def predict_similarity(self,
                            input_ids_1, attention_mask_1,
@@ -207,7 +234,7 @@ def train_multitask(args):
                                     collate_fn=sst_dev_data.collate_fn)
 
     # Load data for paraphrase detection
-    para_train_data = SentencePairDataset(para_train_data, args)
+    para_train_data = SentencePairDataset(para_train_data[:5000], args)
     para_dev_data = SentencePairDataset(para_dev_data, args)
 
     para_train_dataloader = DataLoader(para_train_data, shuffle=True, batch_size=args.batch_size,
@@ -292,7 +319,7 @@ def train_multitask(args):
                 optimizer.zero_grad()
                 logits = model.predict_paraphrase(b_ids_1, b_mask_1, b_ids_2, b_mask_2)
                 logits = logits.to(device)
-                loss = F.binary_cross_entropy(logits, b_labels.unsqueeze(1).float(), reduction='mean')
+                loss = F.binary_cross_entropy_with_logits(logits, b_labels.unsqueeze(1).float(), reduction='mean')
 
                 loss.backward()
                 optimizer.step()
@@ -335,23 +362,26 @@ def train_multitask(args):
         if task['sst']:  # Evaluate sentiment analysis
             train_sst_acc, *_ = model_eval_sst(sst_train_dataloader, model, device)
             dev_sst_acc, *_ = model_eval_sst(sst_dev_dataloader, model, device)
+            dev_acc = dev_sst_acc
             print(
                 f"Epoch {epoch} [SST]: train loss :: {train_sst_loss:.3f}, train acc :: {train_sst_acc:.3f}, dev acc :: {dev_sst_acc:.3f}")
 
         if task['para']:  # Evaluate paraphrase detection
             train_para_acc, *_ = model_eval_para(para_train_dataloader, model, device)
             dev_para_acc, *_ = model_eval_para(para_dev_dataloader, model, device)
+            dev_acc = dev_para_acc
             print(
                 f"Epoch {epoch} [PARA]: train loss :: {train_para_loss:.3f}, train acc :: {train_para_acc:.3f}, dev acc :: {dev_para_acc:.3f}")
 
         if task['sts']:  # Evaluate semantic textual similarity
             train_sts_corr, *_ = model_eval_sts(sts_train_dataloader, model, device)
             dev_sts_corr, *_ = model_eval_sts(sts_dev_dataloader, model, device)
+            dev_acc = dev_sts_corr
             print(
                 f"Epoch {epoch} [STS]: train loss :: {train_sts_loss:.3f}, train corr :: {train_sts_corr:.3f}, dev corr :: {dev_sts_corr:.3f}")
 
-        if dev_sst_acc > best_dev_acc:
-            best_dev_acc = dev_sst_acc
+        if dev_acc > best_dev_acc:
+            best_dev_acc = dev_acc
             save_model(model, optimizer, args, config, args.filepath)
 
 

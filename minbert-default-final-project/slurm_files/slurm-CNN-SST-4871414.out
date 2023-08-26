@@ -1,0 +1,48 @@
+================================================================================
+JobID = 4871414
+User = bzkurs47, Account = bzkurs47
+Partition = grete:shared, Nodelist = ggpu02
+================================================================================
+Submitting job with sbatch from directory: /home/bzkurs47/minbert-default-final-project
+Home directory: /home/bzkurs47
+Working directory: /home/bzkurs47/minbert-default-final-project
+Current node: ggpu02
+Loaded 8544 train examples from data/ids-sst-train.csv
+Loaded 141498 train examples from data/quora-train.csv
+Loaded 6040 train examples from data/sts-train.csv
+Loaded 1101 train examples from data/ids-sst-dev.csv
+Loaded 20212 train examples from data/quora-dev.csv
+Loaded 863 train examples from data/sts-dev.csv
+Epoch 0 [SST]: train loss :: 1.396, train acc :: 0.493, dev acc :: 0.450
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 1 [SST]: train loss :: 1.123, train acc :: 0.601, dev acc :: 0.499
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 2 [SST]: train loss :: 0.989, train acc :: 0.650, dev acc :: 0.496
+Epoch 3 [SST]: train loss :: 0.868, train acc :: 0.736, dev acc :: 0.513
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 4 [SST]: train loss :: 0.761, train acc :: 0.735, dev acc :: 0.497
+Epoch 5 [SST]: train loss :: 0.670, train acc :: 0.789, dev acc :: 0.498
+Epoch 6 [SST]: train loss :: 0.572, train acc :: 0.803, dev acc :: 0.482
+Epoch 7 [SST]: train loss :: 0.475, train acc :: 0.907, dev acc :: 0.510
+Epoch 8 [SST]: train loss :: 0.392, train acc :: 0.941, dev acc :: 0.493
+Epoch 9 [SST]: train loss :: 0.341, train acc :: 0.934, dev acc :: 0.490
+Loaded model to test from finetune-10-1e-05-multitask.pt
+Loaded 2210 test examples from data/ids-sst-test-student.csv
+Loaded 40429 test examples from data/quora-test-student.csv
+Loaded 1379 test examples from data/sts-test-student.csv
+Loaded 1101 dev examples from data/ids-sst-dev.csv
+Loaded 20212 dev examples from data/quora-dev.csv
+Loaded 863 dev examples from data/sts-dev.csv
+Paraphrase detection accuracy: 0.610
+Sentiment classification accuracy: 0.513
+Semantic Textual Similarity correlation: 0.055
+dev sentiment acc :: 0.513
+dev paraphrase acc :: 0.610
+dev sts corr :: 0.055
+============ Job Information ===================================================
+Submitted: 2023-08-26T22:41:15
+Started: 2023-08-26T22:41:16
+Ended: 2023-08-26T23:04:36
+Elapsed: 24 min, Limit: 120 min, Difference: 96 min
+CPUs: 4, Nodes: 1
+Estimated NPL: ================================================================================
