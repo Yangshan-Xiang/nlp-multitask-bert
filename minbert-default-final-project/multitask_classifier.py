@@ -73,7 +73,7 @@ class MultitaskBERT(nn.Module):
         self.bert = BertModel.from_pretrained('bert-base-uncased', local_files_only=config.local_files_only)
         self.constant_bert = BertModel.from_pretrained('bert-base-uncased', local_files_only=config.local_files_only)
         for param in self.constant_bert.parameters():
-            param.requires_grad = False
+             param.requires_grad = False
         ### TODO
 
         # Pretrain mode does not require updating bert parameters.
@@ -84,23 +84,18 @@ class MultitaskBERT(nn.Module):
                 param.requires_grad = True
         # Sentiment classification
         self.TextCNN = TextCNN()
-        self.sst_1 = nn.Linear(300, 100)
-        self.sst_2 = nn.Linear(100, 5)
+        self.sst_1 = nn.Linear(300, 5)
         self.sst_fc1 = nn.Linear(BERT_HIDDEN_SIZE, int(BERT_HIDDEN_SIZE / 2))
         self.sst_fc2 = nn.Linear(int(BERT_HIDDEN_SIZE / 2), 5)
 
         self.TextCNN_para = TextCNN()
-        self.para_1 = nn.Linear(300 * 2, 300)
-        self.para_2 = nn.Linear(300, 100)
-        self.para_3 = nn.Linear(100, 1)
+        self.para_1 = nn.Linear(300 * 2, 1)
         self.para_fc1 = nn.Linear(BERT_HIDDEN_SIZE * 3, BERT_HIDDEN_SIZE * 2)
         self.para_fc2 = nn.Linear(BERT_HIDDEN_SIZE * 2, BERT_HIDDEN_SIZE)
         self.para_fc3 = nn.Linear(BERT_HIDDEN_SIZE, 1)
 
         self.TextCNN_simi = TextCNN()
-        self.simi_1 = nn.Linear(300 * 2, 300)
-        self.simi_2 = nn.Linear(300, 100)
-        self.simi_3 = nn.Linear(100, 1)
+        self.simi_1 = nn.Linear(300 * 2, 1)
         self.simi_fc1 = nn.Linear(BERT_HIDDEN_SIZE * 3, BERT_HIDDEN_SIZE * 2)
         self.simi_fc2 = nn.Linear(BERT_HIDDEN_SIZE * 2, BERT_HIDDEN_SIZE)
         self.simi_fc3 = nn.Linear(BERT_HIDDEN_SIZE, 1)
@@ -131,7 +126,6 @@ class MultitaskBERT(nn.Module):
 
         output = self.TextCNN(last_hidden_state, constant_embedding)
         output = self.af(self.dropout(self.sst_1(output)))
-        output = self.sst_2(output)
 
         y = self.sst_fc1(pooler_output)
         y = self.dropout(y)
@@ -163,8 +157,6 @@ class MultitaskBERT(nn.Module):
         core_2 = self.TextCNN_para(hidden_2, constant_embedding_2)
         core = torch.cat((core_1, core_2), dim=1)
         output = self.af(self.dropout(self.para_1(core)))
-        output = self.af(self.dropout(self.para_2(output)))
-        output = self.af(self.dropout(self.para_3(output)))
 
         x3 = torch.abs(pooler_1 - pooler_2)
         x = torch.cat((pooler_1, pooler_2, x3), dim=1)
@@ -199,8 +191,6 @@ class MultitaskBERT(nn.Module):
         core_2 = self.TextCNN_simi(hidden_2, constant_embedding_2)
         core = torch.cat((core_1, core_2), dim=1)
         output = self.af(self.dropout(self.simi_1(core)))
-        output = self.af(self.dropout(self.simi_2(output)))
-        output = self.af(self.dropout(self.simi_3(output)))
 
         x3 = torch.abs(pooler_1 - pooler_2)
         x = torch.cat((pooler_1, pooler_2, x3), dim=1)
@@ -214,6 +204,7 @@ class MultitaskBERT(nn.Module):
         output = (x + output) / 2
 
         return output
+
 
 
 def save_model(model, optimizer, args, config, filepath):
@@ -282,7 +273,7 @@ def train_multitask(args):
     model = model.to(device)
 
     lr = args.lr
-    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     best_dev_acc = 0
 
     # Run for the specified number of epochs
@@ -291,8 +282,8 @@ def train_multitask(args):
 
         # Enable all tasks
         task = {
-            'sst': False,
-            'para': False,
+            'sst': True,
+            'para': True,
             'sts': True,
         }
 
@@ -397,8 +388,8 @@ def train_multitask(args):
             print(
                 f"Epoch {epoch} [STS]: train loss :: {train_sts_loss:.3f}, train corr :: {train_sts_corr:.3f}, dev corr :: {dev_sts_corr:.3f}")
 
-        if (dev_sst_acc + dev_para_acc) / 2 > best_dev_acc:
-            best_dev_acc = (dev_sst_acc + dev_para_acc) / 2
+        if (dev_sst_acc + dev_para_acc + dev_sts_corr) / 3 > best_dev_acc:
+            best_dev_acc = (dev_sst_acc + dev_para_acc + dev_sts_corr) / 3
             save_model(model, optimizer, args, config, args.filepath)
 
 
