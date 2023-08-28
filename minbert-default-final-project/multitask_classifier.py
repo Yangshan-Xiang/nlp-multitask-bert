@@ -71,6 +71,9 @@ class MultitaskBERT(nn.Module):
         super(MultitaskBERT, self).__init__()
         # You will want to add layers here to perform the downstream tasks.
         self.bert = BertModel.from_pretrained('bert-base-uncased', local_files_only=config.local_files_only)
+        self.constant_bert = BertModel.from_pretrained('bert-base-uncased', local_files_only=config.local_files_only)
+        for param in self.constant_bert.parameters():
+            param.requires_grad = False
         ### TODO
 
         # Pretrain mode does not require updating bert parameters.
@@ -94,11 +97,13 @@ class MultitaskBERT(nn.Module):
         self.para_fc2 = nn.Linear(BERT_HIDDEN_SIZE * 2, BERT_HIDDEN_SIZE)
         self.para_fc3 = nn.Linear(BERT_HIDDEN_SIZE, 1)
 
-        self.similarity_1 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
-        self.similarity_2 = nn.Linear(BERT_HIDDEN_SIZE, BERT_HIDDEN_SIZE)
-        self.similarity_3 = nn.Linear(BERT_HIDDEN_SIZE * 2, 1)
-        self.similarity_4 = nn.Linear(BERT_HIDDEN_SIZE, 1)
-        self.similarity_5 = nn.Linear(2, 1)
+        self.TextCNN_simi = TextCNN()
+        self.simi_1 = nn.Linear(300 * 2, 300)
+        self.simi_2 = nn.Linear(300, 100)
+        self.simi_3 = nn.Linear(100, 1)
+        self.simi_fc1 = nn.Linear(BERT_HIDDEN_SIZE * 3, BERT_HIDDEN_SIZE * 2)
+        self.simi_fc2 = nn.Linear(BERT_HIDDEN_SIZE * 2, BERT_HIDDEN_SIZE)
+        self.simi_fc3 = nn.Linear(BERT_HIDDEN_SIZE, 1)
 
         self.af = nn.ELU()
         self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
@@ -120,7 +125,7 @@ class MultitaskBERT(nn.Module):
         '''
         ### TODO
         x = self.forward(input_ids, attention_mask)
-        constant_embedding = self.bert.embed(input_ids) * attention_mask.unsqueeze(-1)
+        constant_embedding = self.constant_bert.embed(input_ids) * attention_mask.unsqueeze(-1)
         last_hidden_state = x['last_hidden_state'] * attention_mask.unsqueeze(-1)
         pooler_output = x['pooler_output']
 
@@ -151,8 +156,8 @@ class MultitaskBERT(nn.Module):
         pooler_2 = embedding_2['pooler_output']
         hidden_1 = embedding_1['last_hidden_state'] * attention_mask_1.unsqueeze(-1)
         hidden_2 = embedding_2['last_hidden_state'] * attention_mask_2.unsqueeze(-1)
-        constant_embedding_1 = self.bert.embed(input_ids_1) * attention_mask_1.unsqueeze(-1)
-        constant_embedding_2 = self.bert.embed(input_ids_2) * attention_mask_2.unsqueeze(-1)
+        constant_embedding_1 = self.constant_bert.embed(input_ids_1) * attention_mask_1.unsqueeze(-1)
+        constant_embedding_2 = self.constant_bert.embed(input_ids_2) * attention_mask_2.unsqueeze(-1)
 
         core_1 = self.TextCNN_para(hidden_1, constant_embedding_1)
         core_2 = self.TextCNN_para(hidden_2, constant_embedding_2)
@@ -181,22 +186,34 @@ class MultitaskBERT(nn.Module):
         Note that your output should be unnormalized (a logit).
         '''
         ### TODO
-        hidd_1 = self.forward(input_ids_1, attention_mask_1)['last_hidden_state'] * attention_mask_1.unsqueeze(-1)
-        hidd_2 = self.forward(input_ids_2, attention_mask_2)['last_hidden_state'] * attention_mask_2.unsqueeze(-1)
-        hidd = torch.cat((hidd_1, hidd_2), dim=1)
-        hidd = self.dropout(self.af(self.similarity_4(hidd)))
-        hidd = hidd.squeeze(2)
-        hidd = torch.mean(hidd, dim=1).unsqueeze(1)
+        embedding_1 = self.forward(input_ids_1, attention_mask_1)
+        embedding_2 = self.forward(input_ids_2, attention_mask_2)
+        pooler_1 = embedding_1['pooler_output']
+        pooler_2 = embedding_2['pooler_output']
+        hidden_1 = embedding_1['last_hidden_state'] * attention_mask_1.unsqueeze(-1)
+        hidden_2 = embedding_2['last_hidden_state'] * attention_mask_2.unsqueeze(-1)
+        constant_embedding_1 = self.constant_bert.embed(input_ids_1) * attention_mask_1.unsqueeze(-1)
+        constant_embedding_2 = self.constant_bert.embed(input_ids_2) * attention_mask_2.unsqueeze(-1)
 
-        out_1 = self.forward(input_ids_1, attention_mask_1)['pooler_output']
-        out_2 = self.forward(input_ids_2, attention_mask_2)['pooler_output']
-        out_1 = self.similarity_1(out_1)
-        out_2 = self.similarity_2(out_2)
-        out = torch.cat((out_1, out_2), 1)
-        out = self.similarity_3(out)
-        final = torch.cat((out, hidd), dim=1)
-        final = self.af(self.similarity_5(final))
-        return final
+        core_1 = self.TextCNN_simi(hidden_1, constant_embedding_1)
+        core_2 = self.TextCNN_simi(hidden_2, constant_embedding_2)
+        core = torch.cat((core_1, core_2), dim=1)
+        output = self.af(self.dropout(self.simi_1(core)))
+        output = self.af(self.dropout(self.simi_2(output)))
+        output = self.af(self.dropout(self.simi_3(output)))
+
+        x3 = torch.abs(pooler_1 - pooler_2)
+        x = torch.cat((pooler_1, pooler_2, x3), dim=1)
+
+        x = self.simi_fc1(x)
+        x = self.dropout(x)
+        x = self.simi_fc2(x)
+        x = self.dropout(x)
+        x = self.simi_fc3(x)
+
+        output = (x + output) / 2
+
+        return output
 
 
 def save_model(model, optimizer, args, config, filepath):
@@ -265,7 +282,7 @@ def train_multitask(args):
     model = model.to(device)
 
     lr = args.lr
-    optimizer = AdamW(model.parameters(), lr=lr)
+    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     best_dev_acc = 0
 
     # Run for the specified number of epochs
@@ -274,9 +291,9 @@ def train_multitask(args):
 
         # Enable all tasks
         task = {
-            'sst': True,
+            'sst': False,
             'para': False,
-            'sts': False,
+            'sts': True,
         }
 
         if task['sst']:  # Train sentiment analysis
@@ -380,8 +397,8 @@ def train_multitask(args):
             print(
                 f"Epoch {epoch} [STS]: train loss :: {train_sts_loss:.3f}, train corr :: {train_sts_corr:.3f}, dev corr :: {dev_sts_corr:.3f}")
 
-        if dev_acc > best_dev_acc:
-            best_dev_acc = dev_acc
+        if (dev_sst_acc + dev_para_acc) / 2 > best_dev_acc:
+            best_dev_acc = (dev_sst_acc + dev_para_acc) / 2
             save_model(model, optimizer, args, config, args.filepath)
 
 

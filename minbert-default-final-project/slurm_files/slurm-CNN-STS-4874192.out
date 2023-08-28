@@ -1,0 +1,49 @@
+================================================================================
+JobID = 4874192
+User = bzkurs47, Account = bzkurs47
+Partition = grete:shared, Nodelist = ggpu02
+================================================================================
+Submitting job with sbatch from directory: /home/bzkurs47/minbert-default-final-project
+Home directory: /home/bzkurs47
+Working directory: /home/bzkurs47/minbert-default-final-project
+Current node: ggpu02
+Loaded 8544 train examples from data/ids-sst-train.csv
+Loaded 141498 train examples from data/quora-train.csv
+Loaded 6040 train examples from data/sts-train.csv
+Loaded 1101 train examples from data/ids-sst-dev.csv
+Loaded 20212 train examples from data/quora-dev.csv
+Loaded 863 train examples from data/sts-dev.csv
+Epoch 0 [STS]: train loss :: 2.822, train corr :: 0.232, dev corr :: 0.220
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 1 [STS]: train loss :: 2.062, train corr :: 0.378, dev corr :: 0.319
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 2 [STS]: train loss :: 1.864, train corr :: 0.553, dev corr :: 0.378
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 3 [STS]: train loss :: 1.619, train corr :: 0.683, dev corr :: 0.380
+save the model to finetune-10-1e-05-multitask.pt
+Epoch 4 [STS]: train loss :: 1.361, train corr :: 0.786, dev corr :: 0.359
+Epoch 5 [STS]: train loss :: 1.081, train corr :: 0.842, dev corr :: 0.345
+Epoch 6 [STS]: train loss :: 0.868, train corr :: 0.881, dev corr :: 0.361
+Epoch 7 [STS]: train loss :: 0.726, train corr :: 0.905, dev corr :: 0.351
+Epoch 8 [STS]: train loss :: 0.622, train corr :: 0.912, dev corr :: 0.358
+Epoch 9 [STS]: train loss :: 0.540, train corr :: 0.930, dev corr :: 0.365
+Loaded model to test from finetune-10-1e-05-multitask.pt
+Loaded 2210 test examples from data/ids-sst-test-student.csv
+Loaded 40429 test examples from data/quora-test-student.csv
+Loaded 1379 test examples from data/sts-test-student.csv
+Loaded 1101 dev examples from data/ids-sst-dev.csv
+Loaded 20212 dev examples from data/quora-dev.csv
+Loaded 863 dev examples from data/sts-dev.csv
+Paraphrase detection accuracy: 0.625
+Sentiment classification accuracy: 0.225
+Semantic Textual Similarity correlation: 0.380
+dev sentiment acc :: 0.225
+dev paraphrase acc :: 0.625
+dev sts corr :: 0.380
+============ Job Information ===================================================
+Submitted: 2023-08-28T20:38:56
+Started: 2023-08-28T20:39:13
+Ended: 2023-08-28T21:05:24
+Elapsed: 27 min, Limit: 120 min, Difference: 93 min
+CPUs: 4, Nodes: 1
+Estimated NPL: ================================================================================
