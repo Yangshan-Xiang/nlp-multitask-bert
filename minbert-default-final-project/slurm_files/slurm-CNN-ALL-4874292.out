@@ -1,0 +1,135 @@
+================================================================================
+JobID = 4874292
+User = bzkurs47, Account = bzkurs47
+Partition = grete:shared, Nodelist = ggpu135
+================================================================================
+Submitting job with sbatch from directory: /home/bzkurs47/minbert-default-final-project
+Home directory: /home/bzkurs47
+Working directory: /home/bzkurs47/minbert-default-final-project
+Current node: ggpu135
+Loaded 8544 train examples from data/ids-sst-train.csv
+Loaded 141498 train examples from data/quora-train.csv
+Loaded 6040 train examples from data/sts-train.csv
+Loaded 1101 train examples from data/ids-sst-dev.csv
+Loaded 20212 train examples from data/quora-dev.csv
+Loaded 863 train examples from data/sts-dev.csv
+Epoch 0 [SST]: train loss :: 1.403, train acc :: 0.315, dev acc :: 0.293
+Epoch 0 [PARA]: train loss :: 0.479, train acc :: 0.371, dev acc :: 0.376
+Epoch 0 [STS]: train loss :: 2.902, train corr :: 0.219, dev corr :: 0.216
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 1 [SST]: train loss :: 1.253, train acc :: 0.380, dev acc :: 0.375
+Epoch 1 [PARA]: train loss :: 0.364, train acc :: 0.782, dev acc :: 0.748
+Epoch 1 [STS]: train loss :: 2.142, train corr :: 0.366, dev corr :: 0.318
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 2 [SST]: train loss :: 1.082, train acc :: 0.431, dev acc :: 0.401
+Epoch 2 [PARA]: train loss :: 0.293, train acc :: 0.889, dev acc :: 0.825
+Epoch 2 [STS]: train loss :: 1.960, train corr :: 0.540, dev corr :: 0.408
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 3 [SST]: train loss :: 0.983, train acc :: 0.427, dev acc :: 0.411
+Epoch 3 [PARA]: train loss :: 0.238, train acc :: 0.950, dev acc :: 0.864
+Epoch 3 [STS]: train loss :: 1.675, train corr :: 0.719, dev corr :: 0.498
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 4 [SST]: train loss :: 0.894, train acc :: 0.512, dev acc :: 0.425
+Epoch 4 [PARA]: train loss :: 0.192, train acc :: 0.963, dev acc :: 0.863
+Epoch 4 [STS]: train loss :: 1.244, train corr :: 0.851, dev corr :: 0.608
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 5 [SST]: train loss :: 0.817, train acc :: 0.531, dev acc :: 0.418
+Epoch 5 [PARA]: train loss :: 0.153, train acc :: 0.966, dev acc :: 0.854
+Epoch 5 [STS]: train loss :: 0.820, train corr :: 0.912, dev corr :: 0.658
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 6 [SST]: train loss :: 0.748, train acc :: 0.469, dev acc :: 0.394
+Epoch 6 [PARA]: train loss :: 0.125, train acc :: 0.980, dev acc :: 0.857
+Epoch 6 [STS]: train loss :: 0.596, train corr :: 0.942, dev corr :: 0.670
+Epoch 7 [SST]: train loss :: 0.679, train acc :: 0.550, dev acc :: 0.430
+Epoch 7 [PARA]: train loss :: 0.101, train acc :: 0.980, dev acc :: 0.849
+Epoch 7 [STS]: train loss :: 0.456, train corr :: 0.957, dev corr :: 0.676
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 8 [SST]: train loss :: 0.603, train acc :: 0.620, dev acc :: 0.446
+Epoch 8 [PARA]: train loss :: 0.081, train acc :: 0.984, dev acc :: 0.851
+Epoch 8 [STS]: train loss :: 0.379, train corr :: 0.967, dev corr :: 0.690
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 9 [SST]: train loss :: 0.539, train acc :: 0.612, dev acc :: 0.445
+Epoch 9 [PARA]: train loss :: 0.069, train acc :: 0.994, dev acc :: 0.865
+Epoch 9 [STS]: train loss :: 0.318, train corr :: 0.971, dev corr :: 0.687
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 10 [SST]: train loss :: 0.473, train acc :: 0.685, dev acc :: 0.450
+Epoch 10 [PARA]: train loss :: 0.057, train acc :: 0.994, dev acc :: 0.858
+Epoch 10 [STS]: train loss :: 0.272, train corr :: 0.976, dev corr :: 0.690
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 11 [SST]: train loss :: 0.412, train acc :: 0.734, dev acc :: 0.452
+Epoch 11 [PARA]: train loss :: 0.050, train acc :: 0.994, dev acc :: 0.854
+Epoch 11 [STS]: train loss :: 0.254, train corr :: 0.978, dev corr :: 0.698
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 12 [SST]: train loss :: 0.363, train acc :: 0.818, dev acc :: 0.467
+Epoch 12 [PARA]: train loss :: 0.043, train acc :: 0.995, dev acc :: 0.856
+Epoch 12 [STS]: train loss :: 0.229, train corr :: 0.979, dev corr :: 0.700
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 13 [SST]: train loss :: 0.300, train acc :: 0.824, dev acc :: 0.452
+Epoch 13 [PARA]: train loss :: 0.038, train acc :: 0.997, dev acc :: 0.860
+Epoch 13 [STS]: train loss :: 0.212, train corr :: 0.981, dev corr :: 0.702
+Epoch 14 [SST]: train loss :: 0.279, train acc :: 0.836, dev acc :: 0.449
+Epoch 14 [PARA]: train loss :: 0.034, train acc :: 0.998, dev acc :: 0.860
+Epoch 14 [STS]: train loss :: 0.201, train corr :: 0.983, dev corr :: 0.698
+Epoch 15 [SST]: train loss :: 0.247, train acc :: 0.907, dev acc :: 0.477
+Epoch 15 [PARA]: train loss :: 0.031, train acc :: 0.996, dev acc :: 0.850
+Epoch 15 [STS]: train loss :: 0.192, train corr :: 0.985, dev corr :: 0.708
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 16 [SST]: train loss :: 0.219, train acc :: 0.892, dev acc :: 0.479
+Epoch 16 [PARA]: train loss :: 0.028, train acc :: 0.998, dev acc :: 0.864
+Epoch 16 [STS]: train loss :: 0.179, train corr :: 0.984, dev corr :: 0.714
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 17 [SST]: train loss :: 0.198, train acc :: 0.894, dev acc :: 0.458
+Epoch 17 [PARA]: train loss :: 0.025, train acc :: 0.998, dev acc :: 0.861
+Epoch 17 [STS]: train loss :: 0.172, train corr :: 0.986, dev corr :: 0.710
+Epoch 18 [SST]: train loss :: 0.185, train acc :: 0.927, dev acc :: 0.479
+Epoch 18 [PARA]: train loss :: 0.022, train acc :: 0.999, dev acc :: 0.864
+Epoch 18 [STS]: train loss :: 0.167, train corr :: 0.985, dev corr :: 0.709
+Epoch 19 [SST]: train loss :: 0.160, train acc :: 0.958, dev acc :: 0.477
+Epoch 19 [PARA]: train loss :: 0.022, train acc :: 0.998, dev acc :: 0.855
+Epoch 19 [STS]: train loss :: 0.157, train corr :: 0.986, dev corr :: 0.708
+Epoch 20 [SST]: train loss :: 0.138, train acc :: 0.977, dev acc :: 0.473
+Epoch 20 [PARA]: train loss :: 0.020, train acc :: 0.998, dev acc :: 0.858
+Epoch 20 [STS]: train loss :: 0.150, train corr :: 0.987, dev corr :: 0.714
+Epoch 21 [SST]: train loss :: 0.124, train acc :: 0.970, dev acc :: 0.460
+Epoch 21 [PARA]: train loss :: 0.020, train acc :: 0.999, dev acc :: 0.857
+Epoch 21 [STS]: train loss :: 0.146, train corr :: 0.988, dev corr :: 0.717
+Epoch 22 [SST]: train loss :: 0.121, train acc :: 0.979, dev acc :: 0.480
+Epoch 22 [PARA]: train loss :: 0.018, train acc :: 0.999, dev acc :: 0.866
+Epoch 22 [STS]: train loss :: 0.138, train corr :: 0.987, dev corr :: 0.715
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 23 [SST]: train loss :: 0.097, train acc :: 0.979, dev acc :: 0.458
+Epoch 23 [PARA]: train loss :: 0.017, train acc :: 0.999, dev acc :: 0.859
+Epoch 23 [STS]: train loss :: 0.140, train corr :: 0.989, dev corr :: 0.711
+Epoch 24 [SST]: train loss :: 0.093, train acc :: 0.981, dev acc :: 0.480
+Epoch 24 [PARA]: train loss :: 0.016, train acc :: 0.999, dev acc :: 0.870
+Epoch 24 [STS]: train loss :: 0.129, train corr :: 0.988, dev corr :: 0.711
+Epoch 25 [SST]: train loss :: 0.097, train acc :: 0.981, dev acc :: 0.490
+Epoch 25 [PARA]: train loss :: 0.014, train acc :: 0.999, dev acc :: 0.862
+Epoch 25 [STS]: train loss :: 0.133, train corr :: 0.989, dev corr :: 0.713
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 26 [SST]: train loss :: 0.108, train acc :: 0.988, dev acc :: 0.484
+Epoch 26 [PARA]: train loss :: 0.015, train acc :: 0.999, dev acc :: 0.859
+Epoch 26 [STS]: train loss :: 0.122, train corr :: 0.990, dev corr :: 0.717
+Epoch 27 [SST]: train loss :: 0.090, train acc :: 0.986, dev acc :: 0.497
+Epoch 27 [PARA]: train loss :: 0.014, train acc :: 0.999, dev acc :: 0.860
+Epoch 27 [STS]: train loss :: 0.121, train corr :: 0.989, dev corr :: 0.708
+save the model to finetune-100-1e-05-multitask.pt
+Epoch 28 [SST]: train loss :: 0.071, train acc :: 0.989, dev acc :: 0.474
+Epoch 28 [PARA]: train loss :: 0.013, train acc :: 0.999, dev acc :: 0.863
+Epoch 28 [STS]: train loss :: 0.116, train corr :: 0.990, dev corr :: 0.714
+Epoch 29 [SST]: train loss :: 0.076, train acc :: 0.989, dev acc :: 0.474
+Epoch 29 [PARA]: train loss :: 0.014, train acc :: 0.999, dev acc :: 0.863
+Epoch 29 [STS]: train loss :: 0.112, train corr :: 0.991, dev corr :: 0.715
+Epoch 30 [SST]: train loss :: 0.073, train acc :: 0.990, dev acc :: 0.473
+Epoch 30 [PARA]: train loss :: 0.012, train acc :: 0.999, dev acc :: 0.857
+Epoch 30 [STS]: train loss :: 0.111, train corr :: 0.990, dev corr :: 0.717
+Epoch 31 [SST]: train loss :: 0.066, train acc :: 0.979, dev acc :: 0.450
+Epoch 31 [PARA]: train loss :: 0.012, train acc :: 1.000, dev acc :: 0.861
+Epoch 31 [STS]: train loss :: 0.110, train corr :: 0.991, dev corr :: 0.717
+============ Job Information ===================================================
+Submitted: 2023-08-28T23:23:18
+Started: 2023-08-28T23:23:24
+Ended: 2023-08-29T09:23:38
+Elapsed: 601 min, Limit: 600 min, Difference: -1 min
+CPUs: 4, Nodes: 1
+Estimated NPL: ================================================================================
