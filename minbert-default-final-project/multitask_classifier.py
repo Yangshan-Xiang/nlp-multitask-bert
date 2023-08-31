@@ -259,7 +259,7 @@ def train_multitask(args):
     para_train_dataloader = DataLoader(para_train_data, shuffle=True, batch_size=args.batch_size,
                                        collate_fn=para_train_data.collate_fn)
     para_dev_dataloader = DataLoader(para_dev_data, shuffle=False, batch_size=args.batch_size,
-                                     collate_fn=para_train_data.collate_fn)
+                                     collate_fn=para_dev_data.collate_fn)
 
     # Load data for semantic textual similarity
     sts_train_data = SentencePairDataset(sts_train_data, args, isRegression=True)
@@ -268,7 +268,7 @@ def train_multitask(args):
     sts_train_dataloader = DataLoader(sts_train_data, shuffle=True, batch_size=args.batch_size,
                                       collate_fn=sts_train_data.collate_fn)
     sts_dev_dataloader = DataLoader(sts_dev_data, shuffle=False, batch_size=args.batch_size,
-                                    collate_fn=sts_train_data.collate_fn)
+                                    collate_fn=sts_dev_data.collate_fn)
 
     # Init model
     config = {'hidden_dropout_prob': args.hidden_dropout_prob,
