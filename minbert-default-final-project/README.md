@@ -46,6 +46,10 @@ The accuracy over 31 epochs is displayed in the graph below:
 </p>
 
 You can find the model predictions under the [predictions](predictions) folder and the running information under the [slurm_files](slurm_files) folder.
+## Experiments
+Tried different loss functions for semantic similarity:
+- cosine similarity: Noticed the evaluation of semantic similarity task is by computing Pearson correlation, so using cosine similarity as loss function can achieve a better correlation on development set, but the predictions are unreasonable and out of the range between 0 and 5.
+- mean square error: In order to solve the unreasonable predictions, picked MSE as loss function, predictions are within the range, but the Pearson correlation decreased.
 
 ## Methodology
 The core of this model is the `TextCNN` which is inspired by computer vision.
@@ -63,7 +67,7 @@ Next in order to process different size of input, Spatial Pyramid Pooling is add
 Finally use fully connected layer to generate the desired output for loss function.
 
 ## Contribution
-Due to the unique architecture (using CNN) of this model, the work in this repository is mainly done by myself ([Yangshan Xiang](https://gitlab.gwdg.de/yangshan.xiang)), especially the implementation of `TextCNN`.
+Due to the unique architecture (using CNN) of this model, the work in this repository is mainly completed by myself ([Yangshan Xiang](https://gitlab.gwdg.de/yangshan.xiang)), especially the implementation of `TextCNN`.
 
 There are few ideas which I adopted from my group mates:
 - From [Jonas](https://gitlab.gwdg.de/j.rieling): The architecture for processing `pooler_output`.
