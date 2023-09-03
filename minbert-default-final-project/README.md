@@ -37,7 +37,7 @@ The model is trained on NVIDIA A100 Tensor Core GPU for 10 hours, achieved the f
 | Task name              | Training Accuracy | Development Accuracy |
 |------------------------|-------------------|----------------------|
 | Sentiment Analysis     | 98.6%             | 49.7%                |
-| Semantic Similarity    | 98.9%             | 70.8%                |
+| Semantic Similarity    | 98.9%             | 71.3%                |
 | Paraphrase Detection   | 99.9%             | 86.0%                |
 
 The accuracy over 31 epochs is displayed in the graph below:
