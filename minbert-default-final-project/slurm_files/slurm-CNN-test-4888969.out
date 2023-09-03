@@ -1,0 +1,29 @@
+================================================================================
+JobID = 4888969
+User = bzkurs47, Account = bzkurs47
+Partition = grete:shared, Nodelist = ggpu142
+================================================================================
+Submitting job with sbatch from directory: /home/bzkurs47/minbert-default-final-project
+Home directory: /home/bzkurs47
+Working directory: /home/bzkurs47/minbert-default-final-project
+Current node: ggpu142
+Loaded model to test from finetune-100-1e-05-multitask.pt
+Loaded 2210 test examples from data/ids-sst-test-student.csv
+Loaded 40429 test examples from data/quora-test-student.csv
+Loaded 1379 test examples from data/sts-test-student.csv
+Loaded 1101 dev examples from data/ids-sst-dev.csv
+Loaded 20212 dev examples from data/quora-dev.csv
+Loaded 863 dev examples from data/sts-dev.csv
+Paraphrase detection accuracy: 0.860
+Sentiment classification accuracy: 0.497
+Semantic Textual Similarity correlation: 0.708
+dev sentiment acc :: 0.497
+dev paraphrase acc :: 0.860
+dev sts corr :: 0.708
+============ Job Information ===================================================
+Submitted: 2023-09-02T23:01:53
+Started: 2023-09-02T23:01:57
+Ended: 2023-09-02T23:11:26
+Elapsed: 10 min, Limit: 600 min, Difference: 590 min
+CPUs: 4, Nodes: 1
+Estimated NPL: ================================================================================
