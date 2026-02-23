@@ -22,7 +22,7 @@ sbatch train.sh
 
 ## Pre-trained Models
 
-The pretrained model is `finetune-100-1e-05-multitask.pt`, you can find it in this repository.
+The pretrained model is `finetune-100-1e-05-multitask.pt`, you can find it in [here](https://huggingface.co/my-name-is-yang/multitask-bert/tree/main).
 
 - The model is trained on `ids-sst-train.csv`, `quora-train.csv` and `sts-train.csv`.
 - With hyperparameters `lr` = 1e-5, `batch_size` = 64, `hidden_dropout_prob` = 0.3, `epochs` = 100.
