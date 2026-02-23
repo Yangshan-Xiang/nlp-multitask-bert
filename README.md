@@ -13,12 +13,12 @@ In this repository, you can review the implementation of [BERT](https://arxiv.or
 Follow `setup.sh` to properly setup a conda environment and install dependencies.
 
 ## Run
-- Training, evaluation and testing process are all integrated in the [multitask_classifier.py](multitask_classifier.py)
+- Training, evaluation and testing process are all integrated in the multitask_classifier.py.
 - To run this model on GWDG remote cluster, enter the compute nodes, copy this repository to remote cluster, then run this command in the terminal:
 ```
 sbatch train.sh
 ```
-- A detailed description of the code structure is in [STRUCTURE.md](STRUCTURE.md).
+- A detailed description of the code structure is in STRUCTURE.md.
 
 ## Pre-trained Models
 
@@ -45,7 +45,7 @@ The accuracy over 31 epochs is displayed in the graph below:
 <img src="etc/accuracy_over_epochs.png" height=350>
 </p>
 
-You can find the model predictions under the [predictions](predictions) folder and the running information under the [slurm_files](slurm_files) folder.
+You can find the model predictions under the predictions folder and the running information under the slurm_files folder.
 ## Experiments
 Tried different loss functions for semantic similarity:
 - cosine similarity: Noticed the evaluation of semantic similarity task is by computing Pearson correlation, so using cosine similarity as loss function can achieve a better correlation on development set, but the predictions are unreasonable and out of the range between 0 and 5.
